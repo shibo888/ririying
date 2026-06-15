@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日日盈</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --panel: #ffffff;
+      --text: #20231f;
+      --muted: #73786f;
+      --line: #dde2d8;
+      --soft: #f1f5ee;
+      --accent: #25704f;
+      --accent-soft: #e7f2ec;
+      --danger: #b33a2f;
+      --shadow: 0 12px 30px rgba(38, 45, 35, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+
+    header {
+      padding: 8px 2px 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section + .section {
+      margin-top: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      padding: 14px 14px 0;
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .label-row strong {
+      min-width: 0;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .label-row span:last-child {
+      flex: 0 0 auto;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      color: var(--text);
+      font: inherit;
+      font-size: 17px;
+      outline: none;
+      padding: 0 44px 0 12px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease,
+        background 0.15s ease;
+    }
+
+    input:focus {
+      background: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 112, 79, 0.14);
+    }
+
+    .unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .flow {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+    }
+
+    .flow-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 13px;
+    }
+
+    .flow-main {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .flow-title {
+      display: block;
+      font-size: 17px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .flow-note {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .amount {
+      flex: 0 0 auto;
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      font-weight: 780;
+      line-height: 1.15;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .detail {
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 9px 10px;
+      min-width: 0;
+    }
+
+    .detail span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+      margin-bottom: 5px;
+    }
+
+    .detail strong {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: 15px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .profit-card {
+      background: var(--accent-soft);
+      border-color: #c8dfd0;
+    }
+
+    .profit-card .amount {
+      color: var(--accent);
+      font-size: 26px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+      margin-bottom: 7px;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(16px, 5vw, 21px);
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .negative {
+      color: var(--danger) !important;
+    }
+
+    footer {
+      padding: 14px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (min-width: 460px) {
+      main {
+        padding-top: 28px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      label:first-child {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>日日盈</h1>
+      <p class="subtitle">输入经营数据，直接看今天赚不赚钱。</p>
+    </header>
+
+    <section class="section" aria-labelledby="input-title">
+      <h2 class="section-title" id="input-title">经营数据</h2>
+      <div class="form-grid">
+        <label>
+          <span class="label-row">
+            <strong>今日营业额</strong>
+            <span>当天收入</span>
+          </span>
+          <span class="field">
+            <input id="revenue" type="number" inputmode="decimal" min="0" step="0.1" value="700">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>毛利率</strong>
+            <span>默认 50%</span>
+          </span>
+          <span class="field">
+            <input id="grossMargin" type="number" inputmode="decimal" min="0" step="0.1" value="50">
+            <span class="unit">%</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>房租</strong>
+            <span>每月</span>
+          </span>
+          <span class="field">
+            <input id="rent" type="number" inputmode="decimal" min="0" step="0.1" value="4000">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>人工费用</strong>
+            <span>每月</span>
+          </span>
+          <span class="field">
+            <input id="labor" type="number" inputmode="decimal" min="0" step="0.1" value="4500">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>水电气费</strong>
+            <span>每月</span>
+          </span>
+          <span class="field">
+            <input id="utilities" type="number" inputmode="decimal" min="0" step="0.1" value="1200">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>其他杂费（物业费、垃圾费、网络费、纸巾费等）</strong>
+            <span>每月</span>
+          </span>
+          <span class="field">
+            <input id="otherFees" type="number" inputmode="decimal" min="0" step="0.1" value="200">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <label>
+          <span class="label-row">
+            <strong>每月营业天数</strong>
+            <span>默认 26 天</span>
+          </span>
+          <span class="field">
+            <input id="days" type="number" inputmode="numeric" min="1" step="1" value="26">
+            <span class="unit">天</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="flow-title">
+      <h2 class="section-title" id="flow-title">今日利润</h2>
+      <div class="flow">
+        <div class="flow-card">
+          <div class="flow-main">
+            <div>
+              <span class="flow-title">营业额</span>
+              <span class="flow-note">主营业务收入</span>
+            </div>
+            <strong class="amount" id="revenueOut">¥0.0</strong>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-main">
+            <div>
+              <span class="flow-title">毛利</span>
+              <span class="flow-note">营业额扣除食材成本后</span>
+            </div>
+            <strong class="amount" id="grossProfit">¥0.0</strong>
+          </div>
+          <div class="detail-grid">
+            <div class="detail">
+              <span>食材成本</span>
+              <strong id="foodCost">¥0.0</strong>
+            </div>
+            <div class="detail">
+              <span>毛利率</span>
+              <strong id="grossMarginText">50.0%</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-main">
+            <div>
+              <span class="flow-title">费用</span>
+              <span class="flow-note">每月固定支出摊到今天</span>
+            </div>
+            <strong class="amount" id="totalExpense">¥0.0</strong>
+          </div>
+          <div class="detail-grid">
+            <div class="detail">
+              <span>房租</span>
+              <strong id="dailyRent">¥0.0</strong>
+            </div>
+            <div class="detail">
+              <span>人工</span>
+              <strong id="dailyLabor">¥0.0</strong>
+            </div>
+            <div class="detail">
+              <span>水电气</span>
+              <strong id="dailyUtilities">¥0.0</strong>
+            </div>
+            <div class="detail">
+              <span>其他杂费</span>
+              <strong id="dailyOtherFees">¥0.0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card profit-card">
+          <div class="flow-main">
+            <div>
+              <span class="flow-title">净利润</span>
+              <span class="flow-note">毛利 - 费用</span>
+            </div>
+            <strong class="amount" id="dailyProfit">¥0.0</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="month-title">
+      <h2 class="section-title" id="month-title">月度预估</h2>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span>月营业额</span>
+          <strong id="monthlyRevenue">¥0.0</strong>
+        </div>
+        <div class="summary-item">
+          <span>月净利润</span>
+          <strong id="monthlyProfit">¥0.0</strong>
+        </div>
+        <div class="summary-item">
+          <span>每日盈亏平衡线</span>
+          <strong id="breakEven">¥0.0</strong>
+        </div>
+        <div class="summary-item">
+          <span>每月盈亏平衡线</span>
+          <strong id="monthlyBreakEven">¥0.0</strong>
+        </div>
+      </div>
+    </section>
+
+    <footer>结果用于经营估算；平台抽成、税费、折旧、损耗等可并入其他杂费。</footer>
+  </main>
+
+  <script>
+    const fields = {
+      revenue: document.querySelector("#revenue"),
+      grossMargin: document.querySelector("#grossMargin"),
+      rent: document.querySelector("#rent"),
+      labor: document.querySelector("#labor"),
+      utilities: document.querySelector("#utilities"),
+      otherFees: document.querySelector("#otherFees"),
+      days: document.querySelector("#days")
+    };
+
+    const outputs = {
+      revenueOut: document.querySelector("#revenueOut"),
+      grossProfit: document.querySelector("#grossProfit"),
+      foodCost: document.querySelector("#foodCost"),
+      grossMarginText: document.querySelector("#grossMarginText"),
+      totalExpense: document.querySelector("#totalExpense"),
+      dailyRent: document.querySelector("#dailyRent"),
+      dailyLabor: document.querySelector("#dailyLabor"),
+      dailyUtilities: document.querySelector("#dailyUtilities"),
+      dailyOtherFees: document.querySelector("#dailyOtherFees"),
+      dailyProfit: document.querySelector("#dailyProfit"),
+      monthlyRevenue: document.querySelector("#monthlyRevenue"),
+      monthlyProfit: document.querySelector("#monthlyProfit"),
+      breakEven: document.querySelector("#breakEven"),
+      monthlyBreakEven: document.querySelector("#monthlyBreakEven")
+    };
+
+    function readNumber(input, fallback = 0) {
+      const value = Number(input.value);
+      return Number.isFinite(value) ? Math.max(value, 0) : fallback;
+    }
+
+    function formatMoney(value) {
+      const normalized = Object.is(value, -0) ? 0 : value;
+      return `¥${normalized.toFixed(1)}`;
+    }
+
+    function formatPercent(value) {
+      const normalized = Object.is(value, -0) ? 0 : value;
+      return `${normalized.toFixed(1)}%`;
+    }
+
+    function setMoney(element, value) {
+      element.textContent = formatMoney(value);
+      element.classList.toggle("negative", value < 0);
+    }
+
+    function calculate() {
+      const revenue = readNumber(fields.revenue);
+      const grossMargin = Math.min(readNumber(fields.grossMargin) / 100, 1);
+      const rent = readNumber(fields.rent);
+      const labor = readNumber(fields.labor);
+      const utilities = readNumber(fields.utilities);
+      const otherFees = readNumber(fields.otherFees);
+      const days = Math.max(readNumber(fields.days, 1), 1);
+
+      const grossProfit = revenue * grossMargin;
+      const foodCost = revenue - grossProfit;
+      const dailyRent = rent / days;
+      const dailyLabor = labor / days;
+      const dailyUtilities = utilities / days;
+      const dailyOtherFees = otherFees / days;
+      const totalExpense = dailyRent + dailyLabor + dailyUtilities + dailyOtherFees;
+      const dailyProfit = grossProfit - totalExpense;
+      const monthlyRevenue = revenue * days;
+      const monthlyProfit = dailyProfit * days;
+      const breakEven = grossMargin <= 0 ? 0 : totalExpense / grossMargin;
+      const monthlyBreakEven = breakEven * days;
+
+      setMoney(outputs.revenueOut, revenue);
+      setMoney(outputs.grossProfit, grossProfit);
+      setMoney(outputs.foodCost, foodCost);
+      outputs.grossMarginText.textContent = formatPercent(grossMargin * 100);
+      setMoney(outputs.totalExpense, totalExpense);
+      setMoney(outputs.dailyRent, dailyRent);
+      setMoney(outputs.dailyLabor, dailyLabor);
+      setMoney(outputs.dailyUtilities, dailyUtilities);
+      setMoney(outputs.dailyOtherFees, dailyOtherFees);
+      setMoney(outputs.dailyProfit, dailyProfit);
+      setMoney(outputs.monthlyRevenue, monthlyRevenue);
+      setMoney(outputs.monthlyProfit, monthlyProfit);
+      setMoney(outputs.breakEven, breakEven);
+      setMoney(outputs.monthlyBreakEven, monthlyBreakEven);
+    }
+
+    Object.values(fields).forEach((input) => {
+      input.addEventListener("input", calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
