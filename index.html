@@ -127,6 +127,17 @@
         background 0.15s ease;
     }
 
+    input[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+    }
+
     input:focus {
       background: #ffffff;
       border-color: var(--accent);
@@ -534,7 +545,7 @@
 
     <footer>
       结果用于经营估算；平台抽成、税费、折旧、损耗等可并入其他杂费。
-      <span class="version-line">ririying 1.3 · by shibo</span>
+      <span class="version-line">ririying 1.6 · by shibo</span>
     </footer>
   </main>
 
@@ -717,6 +728,25 @@
     }
 
     calculate();
+  </script>
+  <script>
+    const IP_STATS_ENDPOINT = "";
+
+    if (IP_STATS_ENDPOINT) {
+      fetch(IP_STATS_ENDPOINT, {
+        method: "POST",
+        mode: "cors",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          site: location.hostname,
+          path: location.pathname,
+          version: "ririying 1.6"
+        })
+      }).catch(() => {});
+    }
   </script>
   <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"850cf85f14f44350be418eabe7982291"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
