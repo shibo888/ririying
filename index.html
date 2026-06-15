@@ -545,7 +545,7 @@
 
     <footer>
       结果用于经营估算；平台抽成、税费、折旧、损耗等可并入其他杂费。
-      <span class="version-line">ririying 1.6 · by shibo</span>
+      <span class="version-line">ririying 1.7 · by shibo</span>
     </footer>
   </main>
 
@@ -730,7 +730,7 @@
     calculate();
   </script>
   <script>
-    const IP_STATS_ENDPOINT = "";
+    const IP_STATS_ENDPOINT = "https://ririying-ip-stats.shenshibo7.workers.dev/log";
 
     if (IP_STATS_ENDPOINT) {
       fetch(IP_STATS_ENDPOINT, {
@@ -743,7 +743,7 @@
         body: JSON.stringify({
           site: location.hostname,
           path: location.pathname,
-          version: "ririying 1.6"
+          version: "ririying 1.7"
         })
       }).catch(() => {});
     }
