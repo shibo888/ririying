@@ -133,6 +133,29 @@
       box-shadow: 0 0 0 3px rgba(37, 112, 79, 0.14);
     }
 
+    button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      padding: 0 12px;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
     .unit {
       position: absolute;
       right: 12px;
@@ -141,6 +164,29 @@
       color: var(--muted);
       font-size: 14px;
       pointer-events: none;
+    }
+
+    .settings-panel {
+      border-top: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .settings-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .settings-actions .wide {
+      grid-column: 1 / -1;
+    }
+
+    .settings-status {
+      margin: 10px 0 0;
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .flow {
@@ -302,7 +348,7 @@
             <span>当天收入</span>
           </span>
           <span class="field">
-            <input id="revenue" type="number" inputmode="decimal" min="0" step="0.1" value="700">
+            <input id="revenue" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">元</span>
           </span>
         </label>
@@ -310,10 +356,10 @@
         <label>
           <span class="label-row">
             <strong>毛利率</strong>
-            <span>默认 50%</span>
+            <span>百分比</span>
           </span>
           <span class="field">
-            <input id="grossMargin" type="number" inputmode="decimal" min="0" step="0.1" value="50">
+            <input id="grossMargin" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">%</span>
           </span>
         </label>
@@ -324,7 +370,7 @@
             <span>每月</span>
           </span>
           <span class="field">
-            <input id="rent" type="number" inputmode="decimal" min="0" step="0.1" value="4000">
+            <input id="rent" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">元</span>
           </span>
         </label>
@@ -335,7 +381,7 @@
             <span>每月</span>
           </span>
           <span class="field">
-            <input id="labor" type="number" inputmode="decimal" min="0" step="0.1" value="4500">
+            <input id="labor" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">元</span>
           </span>
         </label>
@@ -346,7 +392,7 @@
             <span>每月</span>
           </span>
           <span class="field">
-            <input id="utilities" type="number" inputmode="decimal" min="0" step="0.1" value="1200">
+            <input id="utilities" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">元</span>
           </span>
         </label>
@@ -357,7 +403,7 @@
             <span>每月</span>
           </span>
           <span class="field">
-            <input id="otherFees" type="number" inputmode="decimal" min="0" step="0.1" value="200">
+            <input id="otherFees" type="number" inputmode="decimal" min="0" step="0.1" value="0">
             <span class="unit">元</span>
           </span>
         </label>
@@ -365,13 +411,22 @@
         <label>
           <span class="label-row">
             <strong>每月营业天数</strong>
-            <span>默认 26 天</span>
+            <span>用于摊销</span>
           </span>
           <span class="field">
-            <input id="days" type="number" inputmode="numeric" min="1" step="1" value="26">
+            <input id="days" type="number" inputmode="numeric" min="0" step="1" value="0">
             <span class="unit">天</span>
           </span>
         </label>
+      </div>
+
+      <div class="settings-panel">
+        <div class="settings-actions">
+          <button class="primary wide" id="saveDefaults" type="button">保存当前数据为默认值</button>
+          <button id="loadDefaults" type="button">恢复默认值</button>
+          <button id="clearDefaults" type="button">清空默认值</button>
+        </div>
+        <p class="settings-status" id="settingsStatus">首次打开全部为 0；保存后只在当前手机或浏览器生效。</p>
       </div>
     </section>
 
@@ -392,14 +447,14 @@
           <div class="flow-main">
             <div>
               <span class="flow-title">毛利</span>
-              <span class="flow-note">营业额扣除食材成本后</span>
+              <span class="flow-note">营业额乘以毛利率</span>
             </div>
             <strong class="amount" id="grossProfit">¥0.0</strong>
           </div>
           <div class="detail-grid">
             <div class="detail">
-              <span>食材成本</span>
-              <strong id="foodCost">¥0.0</strong>
+              <span>毛利额</span>
+              <strong id="grossProfitDetail">¥0.0</strong>
             </div>
             <div class="detail">
               <span>毛利率</span>
@@ -487,7 +542,7 @@
     const outputs = {
       revenueOut: document.querySelector("#revenueOut"),
       grossProfit: document.querySelector("#grossProfit"),
-      foodCost: document.querySelector("#foodCost"),
+      grossProfitDetail: document.querySelector("#grossProfitDetail"),
       grossMarginText: document.querySelector("#grossMarginText"),
       totalExpense: document.querySelector("#totalExpense"),
       dailyRent: document.querySelector("#dailyRent"),
@@ -499,6 +554,24 @@
       monthlyProfit: document.querySelector("#monthlyProfit"),
       breakEven: document.querySelector("#breakEven"),
       monthlyBreakEven: document.querySelector("#monthlyBreakEven")
+    };
+
+    const controls = {
+      saveDefaults: document.querySelector("#saveDefaults"),
+      loadDefaults: document.querySelector("#loadDefaults"),
+      clearDefaults: document.querySelector("#clearDefaults"),
+      settingsStatus: document.querySelector("#settingsStatus")
+    };
+
+    const STORAGE_KEY = "ririying-defaults-v1";
+    const ZERO_VALUES = {
+      revenue: "0",
+      grossMargin: "0",
+      rent: "0",
+      labor: "0",
+      utilities: "0",
+      otherFees: "0",
+      days: "0"
     };
 
     function readNumber(input, fallback = 0) {
@@ -521,6 +594,69 @@
       element.classList.toggle("negative", value < 0);
     }
 
+    function showStatus(message) {
+      controls.settingsStatus.textContent = message;
+    }
+
+    function getCurrentValues() {
+      return Object.fromEntries(
+        Object.entries(fields).map(([key, input]) => [key, input.value || "0"])
+      );
+    }
+
+    function applyValues(values) {
+      if (!values || typeof values !== "object") {
+        return;
+      }
+
+      Object.entries(fields).forEach(([key, input]) => {
+        if (Object.prototype.hasOwnProperty.call(values, key)) {
+          input.value = values[key];
+        }
+      });
+      calculate();
+    }
+
+    function loadSavedDefaults() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+          return false;
+        }
+
+        applyValues(JSON.parse(saved));
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function saveDefaults() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(getCurrentValues()));
+        showStatus("已保存。以后用这个浏览器打开，会自动填入这些默认值。");
+      } catch {
+        showStatus("保存失败：当前浏览器可能限制了本地存储。");
+      }
+    }
+
+    function restoreDefaults() {
+      if (loadSavedDefaults()) {
+        showStatus("已恢复本机保存的默认值。");
+      } else {
+        showStatus("还没有保存默认值。");
+      }
+    }
+
+    function clearDefaults() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } finally {
+        applyValues(ZERO_VALUES);
+        showStatus("已清空默认值，当前数据已恢复为 0。");
+      }
+    }
+
     function calculate() {
       const revenue = readNumber(fields.revenue);
       const grossMargin = Math.min(readNumber(fields.grossMargin) / 100, 1);
@@ -528,14 +664,13 @@
       const labor = readNumber(fields.labor);
       const utilities = readNumber(fields.utilities);
       const otherFees = readNumber(fields.otherFees);
-      const days = Math.max(readNumber(fields.days, 1), 1);
+      const days = readNumber(fields.days);
 
       const grossProfit = revenue * grossMargin;
-      const foodCost = revenue - grossProfit;
-      const dailyRent = rent / days;
-      const dailyLabor = labor / days;
-      const dailyUtilities = utilities / days;
-      const dailyOtherFees = otherFees / days;
+      const dailyRent = days > 0 ? rent / days : 0;
+      const dailyLabor = days > 0 ? labor / days : 0;
+      const dailyUtilities = days > 0 ? utilities / days : 0;
+      const dailyOtherFees = days > 0 ? otherFees / days : 0;
       const totalExpense = dailyRent + dailyLabor + dailyUtilities + dailyOtherFees;
       const dailyProfit = grossProfit - totalExpense;
       const monthlyRevenue = revenue * days;
@@ -545,7 +680,7 @@
 
       setMoney(outputs.revenueOut, revenue);
       setMoney(outputs.grossProfit, grossProfit);
-      setMoney(outputs.foodCost, foodCost);
+      setMoney(outputs.grossProfitDetail, grossProfit);
       outputs.grossMarginText.textContent = formatPercent(grossMargin * 100);
       setMoney(outputs.totalExpense, totalExpense);
       setMoney(outputs.dailyRent, dailyRent);
@@ -562,6 +697,14 @@
     Object.values(fields).forEach((input) => {
       input.addEventListener("input", calculate);
     });
+
+    controls.saveDefaults.addEventListener("click", saveDefaults);
+    controls.loadDefaults.addEventListener("click", restoreDefaults);
+    controls.clearDefaults.addEventListener("click", clearDefaults);
+
+    if (loadSavedDefaults()) {
+      showStatus("已加载本机保存的默认值。");
+    }
 
     calculate();
   </script>
