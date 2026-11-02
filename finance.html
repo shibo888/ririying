@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>门店财务状况 · 日日盈</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --panel: #ffffff;
+      --text: #20231f;
+      --muted: #73786f;
+      --line: #dde2d8;
+      --soft: #f1f5ee;
+      --accent: #25704f;
+      --accent-soft: #e7f2ec;
+      --danger: #b33a2f;
+      --danger-soft: #fbeceb;
+      --warn: #8a5a00;
+      --warn-soft: #fdf4e3;
+      --shadow: 0 12px 30px rgba(38, 45, 35, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(100%, 560px);
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+
+    header {
+      padding: 4px 2px 16px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .store-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .store-line input {
+      height: 34px;
+      max-width: 220px;
+      font-size: 14px;
+      padding: 0 10px;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section + .section {
+      margin-top: 14px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 14px 0;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-body {
+      padding: 14px;
+    }
+
+    .loading,
+    .empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      color: var(--text);
+      font: inherit;
+      font-size: 17px;
+      outline: none;
+      padding: 0 12px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    textarea {
+      height: 72px;
+      padding: 10px 12px;
+      font-size: 15px;
+      resize: vertical;
+    }
+
+    select {
+      font-size: 15px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      background: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 112, 79, 0.14);
+    }
+
+    input.invalid {
+      border-color: var(--danger);
+    }
+
+    input:disabled {
+      opacity: 0.55;
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      padding: 0 12px;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    button.danger {
+      border-color: rgba(179, 58, 47, 0.35);
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    button.small {
+      min-height: 32px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    button.ghost {
+      border-color: rgba(37, 112, 79, 0.25);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .amount {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .negative {
+      color: var(--danger) !important;
+    }
+
+    /* 概览 */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .summary-item > span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+      margin-bottom: 7px;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(16px, 5vw, 21px);
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-item small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .summary-item.net {
+      grid-column: 1 / -1;
+      background: var(--accent-soft);
+      border-color: #c8dfd0;
+    }
+
+    .summary-item.net strong {
+      color: var(--accent);
+      font-size: clamp(24px, 8vw, 30px);
+    }
+
+    .summary-item.net.is-negative {
+      background: var(--danger-soft);
+      border-color: #efcdc9;
+    }
+
+    .summary-item.pending {
+      grid-column: 1 / -1;
+      background: var(--warn-soft);
+      border-color: #f0dfbd;
+    }
+
+    .formula {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* 明细 */
+    .group + .group {
+      margin-top: 16px;
+    }
+
+    .group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .group-title {
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .group-total {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .group-hint {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .item-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 10px 11px;
+      cursor: pointer;
+    }
+
+    .item-row:hover {
+      border-color: #c8d0c2;
+    }
+
+    .item-row.is-muted {
+      opacity: 0.65;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .item-name {
+      display: block;
+      font-size: 15px;
+      font-weight: 680;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .item-meta,
+    .item-note {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .item-side {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .item-amount {
+      font-size: 17px;
+      font-weight: 760;
+    }
+
+    .item-amount.is-excluded {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-right: 4px;
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.6;
+      vertical-align: 1px;
+    }
+
+    .badge.confirmed {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge.estimated {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .badge.pending {
+      border: 1px dashed #c79a3a;
+      color: var(--warn);
+    }
+
+    .badge.paid {
+      background: #eceeea;
+      color: var(--muted);
+    }
+
+    .paid-toggle {
+      margin-top: 6px;
+      border: 0;
+      background: none;
+      min-height: 28px;
+      padding: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .member-card {
+      border: 1px solid #c8dfd0;
+      border-radius: 8px;
+      background: #f6faf7;
+      padding: 11px;
+      margin-bottom: 6px;
+    }
+
+    .member-card .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .member-card .row span:first-child {
+      color: var(--muted);
+    }
+
+    .basis-line {
+      margin: 8px 0 0;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 7px 9px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* 结果 */
+    .result-block + .result-block {
+      margin-top: 16px;
+    }
+
+    .result-label {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2px 10px;
+      font-size: 13px;
+    }
+
+    .share-row + .share-row {
+      margin-top: 8px;
+    }
+
+    .share-row .bar {
+      grid-column: 1 / -1;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+
+    .share-row .bar i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .share-row.liab .bar i {
+      background: #c26a3b;
+    }
+
+    .share-row .num {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hint-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hint-list li {
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hint-list li.warn {
+      background: var(--warn-soft);
+      color: #5d4100;
+    }
+
+    .hint-list li.good {
+      background: var(--accent-soft);
+      color: #1d5a3f;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      font-size: 13px;
+    }
+
+    .kv > span:nth-child(odd) {
+      color: var(--muted);
+    }
+
+    .kv > span:nth-child(even) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 650;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 7px 4px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      vertical-align: top;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    tr.current td {
+      font-weight: 750;
+      color: var(--accent);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    /* 历史 */
+    .snapshot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 10px 11px;
+    }
+
+    .snapshot-row + .snapshot-row {
+      margin-top: 6px;
+    }
+
+    .snapshot-actions {
+      display: flex;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
+    .compare-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .compare-bar select {
+      height: 40px;
+      font-size: 14px;
+    }
+
+    .compare-bar button {
+      grid-column: 1 / -1;
+    }
+
+    .compare-result {
+      margin-top: 12px;
+    }
+
+    /* 弹窗 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(20, 24, 20, 0.42);
+      padding: 14px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(100%, 480px);
+      max-height: calc(100vh - 28px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 22px 60px rgba(20, 24, 20, 0.2);
+      padding: 16px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.25;
+      font-weight: 760;
+    }
+
+    .modal-text {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .close-button {
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .form label {
+      display: grid;
+      gap: 6px;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .label-row strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field input {
+      padding-right: 40px;
+    }
+
+    .unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .check {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .segmented {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .segmented label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 8px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .segmented label:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .helper {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .helper p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .helper .three-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+      gap: 6px;
+    }
+
+    .helper input {
+      height: 38px;
+      font-size: 14px;
+      padding: 0 8px;
+    }
+
+    .msg-box {
+      display: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .msg-box.show {
+      display: block;
+    }
+
+    .msg-box.error {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .msg-box.warning {
+      background: var(--warn-soft);
+      color: #5d4100;
+    }
+
+    .msg-box ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .modal-actions .wide {
+      grid-column: 1 / -1;
+    }
+
+    .history-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .history-list li {
+      padding: 5px 0;
+      border-bottom: 1px solid var(--soft);
+      line-height: 1.45;
+    }
+
+    .preview-line {
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 40;
+      transform: translate(-50%, 20px);
+      max-width: calc(100% - 32px);
+      border-radius: 999px;
+      background: #20231f;
+      color: #ffffff;
+      padding: 9px 16px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    footer {
+      padding: 14px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (min-width: 460px) {
+      main {
+        padding-top: 28px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .summary-item.net {
+        grid-column: 1 / -1;
+      }
+
+      .summary-item.pending {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a class="back-link" href="index.html">← 返回今日利润</a>
+      <h1>门店财务状况</h1>
+      <p class="subtitle">盘点店里现在有多少资产、多少负债，扣掉负债后家底还剩多少。</p>
+      <div class="store-line">
+        <span>门店</span>
+        <input id="storeName" type="text" maxlength="30" placeholder="填写门店名称">
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="overview-title">
+      <div class="section-head">
+        <h2 class="section-title" id="overview-title">财务概览</h2>
+        <span class="section-sub" id="lastUpdated"></span>
+      </div>
+      <div class="section-body" id="overview">
+        <p class="loading">正在读取本机数据…</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="assets-title">
+      <div class="section-head">
+        <h2 class="section-title" id="assets-title">资产</h2>
+        <span class="section-sub">点项目可编辑</span>
+      </div>
+      <div class="section-body" id="assetGroups">
+        <p class="loading">正在读取本机数据…</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="liab-title">
+      <div class="section-head">
+        <h2 class="section-title" id="liab-title">负债及待履行义务</h2>
+        <span class="section-sub">已支付的不计入</span>
+      </div>
+      <div class="section-body" id="liabilityGroups">
+        <p class="loading">正在读取本机数据…</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="result-title">
+      <div class="section-head">
+        <h2 class="section-title" id="result-title">财务计算结果</h2>
+      </div>
+      <div class="section-body" id="results">
+        <p class="loading">正在读取本机数据…</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="history-title">
+      <div class="section-head">
+        <h2 class="section-title" id="history-title">历史盘点</h2>
+        <button class="primary small" id="openSnapshot" type="button">保存本次盘点</button>
+      </div>
+      <div class="section-body" id="history">
+        <p class="loading">正在读取本机数据…</p>
+      </div>
+    </section>
+
+    <footer>
+      数据只保存在当前手机或浏览器中。净资产反映此刻的家底，不等于累计经营利润。
+      <span style="display:block;margin-top:6px;color:#8f958b">ririying 2.5 · 门店财务状况</span>
+    </footer>
+  </main>
+
+  <!-- 资产 / 负债项目 -->
+  <div class="modal" id="itemModal" role="dialog" aria-modal="true" aria-labelledby="itemTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 class="modal-title" id="itemTitle">新增项目</h2>
+        <button class="close-button" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <form class="form" id="itemForm" novalidate>
+        <label>
+          <span class="label-row"><strong>类型</strong><span id="itemCategoryLabel"></span></span>
+          <select id="itemSubtype"></select>
+        </label>
+        <label>
+          <span class="label-row"><strong>名称</strong><span>可改成更具体的名字</span></span>
+          <input id="itemName" type="text" maxlength="40">
+        </label>
+        <label>
+          <span class="label-row"><strong id="itemAmountLabel">金额</strong><span id="itemAmountHint">人民币，精确到分</span></span>
+          <span class="field">
+            <input id="itemAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00">
+            <span class="unit">元</span>
+          </span>
+        </label>
+        <label class="check"><input id="itemUnknown" type="checkbox"> 金额暂时未知（列为待确认，不按 0 计入）</label>
+
+        <label id="depositFaceWrap">
+          <span class="label-row"><strong>押金原额</strong><span>合同上交的押金，仅作参考</span></span>
+          <span class="field">
+            <input id="itemFace" type="text" inputmode="decimal" autocomplete="off" placeholder="选填">
+            <span class="unit">元</span>
+          </span>
+        </label>
+
+        <div id="periodWrap">
+          <span class="label-row" style="margin-bottom:6px"><strong>覆盖期间</strong><span>用于检查预付与未付是否重复</span></span>
+          <div class="two-col">
+            <input id="itemPeriodStart" type="month" aria-label="开始月">
+            <input id="itemPeriodEnd" type="month" aria-label="结束月">
+          </div>
+        </div>
+
+        <div class="helper" id="prepaidHelper">
+          <p>按已付总额算出尚未使用的部分（已使用的部分已是费用，不算资产）。</p>
+          <div class="three-col">
+            <input id="helpTotal" type="text" inputmode="decimal" placeholder="已付总额">
+            <input id="helpMonths" type="number" inputmode="numeric" min="1" placeholder="覆盖月数">
+            <input id="helpUsed" type="number" inputmode="numeric" min="0" placeholder="已用月数">
+          </div>
+          <button class="small ghost" id="helpApply" type="button" style="margin-top:8px">计算未使用金额</button>
+        </div>
+
+        <div>
+          <span class="label-row" style="margin-bottom:6px"><strong>数据状态</strong><span>待确认的不计入正式结果</span></span>
+          <div class="segmented" id="itemStatus">
+            <label><input type="radio" name="itemStatus" value="confirmed"> 已确认</label>
+            <label><input type="radio" name="itemStatus" value="estimated"> 估算</label>
+            <label><input type="radio" name="itemStatus" value="pending"> 待确认</label>
+          </div>
+        </div>
+
+        <div id="liabilityFields" class="form" style="margin-top:0">
+          <div class="two-col">
+            <label>
+              <span class="label-row"><strong>发生日期</strong></span>
+              <input id="itemIncurred" type="date">
+            </label>
+            <label>
+              <span class="label-row"><strong>应付日期</strong><span>选填</span></span>
+              <input id="itemDue" type="date">
+            </label>
+          </div>
+          <label class="check"><input id="itemPaid" type="checkbox"> 已支付（已付清的不再计入负债）</label>
+        </div>
+
+        <label>
+          <span class="label-row"><strong>数据来源</strong><span>选填</span></span>
+          <input id="itemSource" type="text" maxlength="40" placeholder="例如：收钱吧后台、手工盘点">
+        </label>
+        <label>
+          <span class="label-row"><strong>备注</strong><span>选填</span></span>
+          <textarea id="itemNote" maxlength="200"></textarea>
+        </label>
+
+        <div class="msg-box error" id="itemErrors" role="alert"></div>
+        <div class="msg-box warning" id="itemWarnings" role="alert"></div>
+
+        <div id="itemHistoryWrap">
+          <span class="label-row" style="margin-bottom:4px"><strong>金额变化记录</strong></span>
+          <ul class="history-list" id="itemHistory"></ul>
+        </div>
+
+        <div class="modal-actions" style="margin-top:0">
+          <button class="primary wide" id="itemSave" type="submit">保存</button>
+          <button class="danger" id="itemDelete" type="button">删除</button>
+          <button type="button" data-close>取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 会员储值 -->
+  <div class="modal" id="memberModal" role="dialog" aria-modal="true" aria-labelledby="memberTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 class="modal-title" id="memberTitle">会员储值余额</h2>
+        <button class="close-button" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <p class="modal-text">会员余额是顾客已经付了钱、门店还没提供的商品，属于待履行义务，不是经营亏损。</p>
+      <form class="form" id="memberForm" novalidate>
+        <label>
+          <span class="label-row"><strong>系统总未核销余额</strong><span>会员系统显示的数字</span></span>
+          <span class="field">
+            <input id="mdTotal" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 9540">
+            <span class="unit">元</span>
+          </span>
+        </label>
+        <label>
+          <span class="label-row"><strong>充值活动规则</strong><span>选填，仅作记录</span></span>
+          <input id="mdRule" type="text" maxlength="60" placeholder="例如：充300送30">
+        </label>
+        <div>
+          <span class="label-row" style="margin-bottom:6px"><strong>余额构成</strong></span>
+          <div class="segmented">
+            <label><input type="radio" name="mdComposition" value="split"> 已拆分充值和赠送</label>
+            <label><input type="radio" name="mdComposition" value="unknown"> 余额构成未知</label>
+          </div>
+        </div>
+        <div id="mdSplit" class="form" style="margin-top:0">
+          <div class="two-col">
+            <label>
+              <span class="label-row"><strong>实际充值余额</strong></span>
+              <span class="field"><input id="mdPaid" type="text" inputmode="decimal" autocomplete="off"><span class="unit">元</span></span>
+            </label>
+            <label>
+              <span class="label-row"><strong>赠送余额</strong></span>
+              <span class="field"><input id="mdBonus" type="text" inputmode="decimal" autocomplete="off"><span class="unit">元</span></span>
+            </label>
+          </div>
+          <div>
+            <span class="label-row" style="margin-bottom:6px"><strong>负债口径</strong></span>
+            <div class="segmented">
+              <label><input type="radio" name="mdBasis" value="full"> 全额（含赠送）</label>
+              <label><input type="radio" name="mdBasis" value="paid_only"> 仅实际充值</label>
+            </div>
+          </div>
+        </div>
+        <div id="mdUnknown" class="form" style="margin-top:0">
+          <p class="preview-line" style="margin:0">不会用活动比例（如 ÷1.1）倒推实际充值金额：每位会员的充值时间、消费顺序和活动规则都可能不同。</p>
+          <label>
+            <span class="label-row"><strong>暂估计入负债的金额</strong><span>选填；不填则列为待确认</span></span>
+            <span class="field"><input id="mdEstimate" type="text" inputmode="decimal" autocomplete="off" placeholder="不填"><span class="unit">元</span></span>
+          </label>
+        </div>
+        <label>
+          <span class="label-row"><strong>备注</strong><span>选填</span></span>
+          <textarea id="mdNote" maxlength="200"></textarea>
+        </label>
+        <div class="preview-line" id="mdPreview"></div>
+        <div class="msg-box error" id="mdErrors" role="alert"></div>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="primary wide" type="submit">保存</button>
+          <button class="danger" id="mdClear" type="button">清除会员储值</button>
+          <button type="button" data-close>取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 平台到账 -->
+  <div class="modal" id="transferModal" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 class="modal-title" id="transferTitle">平台结算款到账</h2>
+        <button class="close-button" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <p class="modal-text" id="transferText"></p>
+      <form class="form" id="transferForm" novalidate>
+        <label>
+          <span class="label-row"><strong>到账金额</strong></span>
+          <span class="field"><input id="transferAmount" type="text" inputmode="decimal" autocomplete="off"><span class="unit">元</span></span>
+        </label>
+        <label>
+          <span class="label-row"><strong>转入账户</strong><span>货币资金中的账户</span></span>
+          <select id="transferTarget"></select>
+        </label>
+        <div class="msg-box error" id="transferErrors" role="alert"></div>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="primary" type="submit">确认到账</button>
+          <button type="button" data-close>取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 保存盘点 -->
+  <div class="modal" id="snapshotModal" role="dialog" aria-modal="true" aria-labelledby="snapshotTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 class="modal-title" id="snapshotTitle">保存本次盘点</h2>
+        <button class="close-button" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <p class="modal-text">会保存当前全部明细、合计和核算口径。之后修改数据不会改动这份记录。</p>
+      <form class="form" id="snapshotForm" novalidate>
+        <label>
+          <span class="label-row"><strong>盘点日期</strong></span>
+          <input id="snapshotDate" type="date">
+        </label>
+        <label>
+          <span class="label-row"><strong>备注</strong><span>选填</span></span>
+          <textarea id="snapshotNote" maxlength="200" placeholder="例如：10 月底盘点"></textarea>
+        </label>
+        <div class="preview-line" id="snapshotPreview"></div>
+        <div class="msg-box error" id="snapshotErrors" role="alert"></div>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="primary" type="submit">保存盘点</button>
+          <button type="button" data-close>取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 查看盘点 -->
+  <div class="modal" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 class="modal-title" id="viewTitle">盘点记录</h2>
+        <button class="close-button" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <div id="viewBody"></div>
+    </div>
+  </div>
+
+  <!-- 二次确认 -->
+  <div class="modal" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" style="z-index:30">
+    <div class="modal-panel">
+      <h2 class="modal-title" id="confirmTitle">确认删除？</h2>
+      <p class="modal-text" id="confirmText"></p>
+      <div class="modal-actions">
+        <button class="danger" id="confirmOk" type="button">确认删除</button>
+        <button id="confirmCancel" type="button">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="finance-core.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      const F = window.FinanceCore;
+      const $ = (sel) => document.querySelector(sel);
+
+      /* ---------- 试用 / 授权：与首页共用同一套本机记录 ---------- */
+      (function checkAccess() {
+        try {
+          const day = 24 * 60 * 60 * 1000;
+          const license = JSON.parse(localStorage.getItem("ririying-license-v1") || "null");
+          if (license && Number(license.expiresAt) > Date.now()) return;
+          let start = Number(localStorage.getItem("ririying-trial-v1"));
+          if (!Number.isFinite(start) || start <= 0) {
+            start = Date.now();
+            localStorage.setItem("ririying-trial-v1", String(start));
+          }
+          if (start + 7 * day <= Date.now()) {
+            location.replace("index.html");
+          }
+        } catch (ignored) {
+          /* 本地存储不可用时不拦截 */
+        }
+      })();
+
+      /* ---------- 状态与持久化 ---------- */
+      let state = F.createEmptyState();
+      let storageOk = true;
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        })[ch]);
+      }
+
+      const money = (cents, opts) => F.formatMoney(cents, opts);
+      function moneyHtml(cents, opts) {
+        const cls = cents < 0 ? "amount negative" : "amount";
+        return `<span class="${cls}">${escapeHtml(money(cents, opts))}</span>`;
+      }
+
+      function formatTime(ts) {
+        if (!ts) return "—";
+        const d = new Date(ts);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      }
+
+      let toastTimer = null;
+      function toast(message, isError) {
+        const el = $("#toast");
+        el.textContent = message;
+        el.classList.toggle("error", !!isError);
+        el.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove("show"), isError ? 4200 : 2200);
+      }
+
+      function commit(next, message) {
+        try {
+          F.saveState(localStorage, next);
+          state = next;
+          render();
+          if (message) toast(message);
+          return true;
+        } catch (error) {
+          storageOk = false;
+          toast("保存失败：浏览器限制了本地存储，本次修改未保存", true);
+          return false;
+        }
+      }
+
+      /* ---------- 渲染 ---------- */
+      function statusBadge(status, label) {
+        return `<span class="badge ${status}">${escapeHtml(label || F.STATUS[status] || status)}</span>`;
+      }
+
+      function renderOverview(t) {
+        const net = t.netCents;
+        const netMeaning = net > 0
+          ? "资产扣除负债和未履行义务后还剩的部分"
+          : net < 0
+            ? `负值：负债和未履行义务比资产多 ${money(-net)}`
+            : "资产与负债相等";
+        const pendingParts = [];
+        pendingParts.push(`资产 ${money(t.pendingAssetsCents)}`);
+        pendingParts.push(`负债 ${money(t.pendingLiabilitiesCents)}`);
+        if (t.unknownAmountCount) pendingParts.push(`另有 ${t.unknownAmountCount} 项金额未知`);
+        $("#overview").innerHTML = `
+          <div class="summary-grid">
+            <div class="summary-item net ${net < 0 ? "is-negative" : ""}" data-testid="net">
+              <span>净资产</span>
+              <strong class="${net < 0 ? "negative" : ""}" id="netValue">${escapeHtml(money(net))}</strong>
+              <small>${escapeHtml(netMeaning)}。净资产不等于累计经营利润。</small>
+            </div>
+            <div class="summary-item">
+              <span>资产总额</span>
+              <strong id="assetsValue">${escapeHtml(money(t.assetsCents))}</strong>
+            </div>
+            <div class="summary-item">
+              <span>负债总额</span>
+              <strong id="liabilitiesValue">${escapeHtml(money(t.liabilitiesCents))}</strong>
+            </div>
+            <div class="summary-item pending">
+              <span>待确认项目金额</span>
+              <strong id="pendingValue">${escapeHtml(money(t.pendingTotalCents))}</strong>
+              <small>${escapeHtml(pendingParts.join(" · "))}；未计入上面的结果</small>
+            </div>
+          </div>
+          <p class="formula">净资产 = 资产总额 − 负债总额。${t.estimatedCount ? `其中 ${t.estimatedCount} 项为估算值。` : ""}${
+            t.member.enabled ? `会员储值口径：${escapeHtml(t.member.basisLabel)}。` : ""
+          }</p>`;
+        $("#lastUpdated").textContent = state.updatedAt ? `更新于 ${formatTime(state.updatedAt)}` : "";
+      }
+
+      function itemRowHtml(kind, item) {
+        const counted = F.isCounted(kind, item);
+        const badges = [];
+        if (kind === "liability" && item.paid) badges.push(statusBadge("paid", "已支付"));
+        badges.push(statusBadge(item.status));
+        const meta = [`更新 ${formatTime(item.updatedAt)}`];
+        if (item.source) meta.push(`来源：${escapeHtml(item.source)}`);
+        if (item.periodStart) meta.push(`期间 ${escapeHtml(item.periodStart)} 至 ${escapeHtml(item.periodEnd)}`);
+        if (kind === "liability") {
+          meta.push(`发生 ${escapeHtml(item.incurredDate || "—")}`);
+          if (item.dueDate) meta.push(`应付 ${escapeHtml(item.dueDate)}`);
+        }
+        if (item.faceCents != null) meta.push(`押金原额 ${escapeHtml(money(item.faceCents))}`);
+        const isSettlement = kind === "asset" && F.findSubtype("asset", item.subtype)?.category.key === "settlement";
+        const amountText = item.amountCents == null ? "金额未知" : money(item.amountCents);
+        return `
+          <div class="item-row ${counted ? "" : "is-muted"}" role="button" tabindex="0" data-edit="${kind}" data-id="${escapeHtml(item.id)}">
+            <div class="item-main">
+              <span class="item-name">${escapeHtml(item.name)}</span>
+              <span class="item-meta">${badges.join("")}${meta.join(" · ")}</span>
+              ${item.note ? `<span class="item-note">${escapeHtml(item.note)}</span>` : ""}
+            </div>
+            <div class="item-side">
+              <strong class="item-amount amount ${counted ? "" : "is-excluded"}">${escapeHtml(amountText)}</strong>
+              ${isSettlement && counted && item.amountCents > 0 ? `<button class="small ghost" type="button" data-transfer="${escapeHtml(item.id)}">到账</button>` : ""}
+            </div>
+          </div>`;
+      }
+
+      function memberCardHtml(t) {
+        const md = state.memberDeposit;
+        if (!md.enabled) {
+          return `<div class="member-card">
+            <div class="row"><span>会员储值余额</span><span>未录入</span></div>
+            <button class="small ghost" type="button" data-member style="margin-top:8px">录入会员储值</button>
+          </div>`;
+        }
+        const m = t.member;
+        const rows = [`<div class="row"><span>系统总未核销余额</span><span class="amount">${escapeHtml(money(md.systemTotalCents))}</span></div>`];
+        if (md.composition === "split") {
+          rows.push(`<div class="row"><span>实际充值余额</span><span class="amount">${escapeHtml(money(md.paidCents))}</span></div>`);
+          rows.push(`<div class="row"><span>赠送余额</span><span class="amount">${escapeHtml(money(md.bonusCents))}</span></div>`);
+        } else {
+          rows.push(`<div class="row"><span>余额构成</span><span>${statusBadge("pending", "未知")}</span></div>`);
+          if (md.estimateCents != null) {
+            rows.push(`<div class="row"><span>暂估计入负债</span><span>${statusBadge("estimated", "暂估")}<span class="amount">${escapeHtml(money(md.estimateCents))}</span></span></div>`);
+          }
+        }
+        rows.push(`<div class="row"><span>计入负债</span><strong class="amount">${m.counted ? escapeHtml(money(m.liabilityCents)) : "未计入（待确认）"}</strong></div>`);
+        if (md.rule) rows.push(`<div class="row"><span>活动规则</span><span>${escapeHtml(md.rule)}</span></div>`);
+        return `<div class="member-card" role="button" tabindex="0" data-member>
+          ${rows.join("")}
+          <p class="basis-line">当前口径：${escapeHtml(m.basisLabel)}</p>
+          <span class="item-meta">更新 ${formatTime(md.updatedAt)}${md.note ? ` · ${escapeHtml(md.note)}` : ""}</span>
+        </div>`;
+      }
+
+      const expandedPaid = new Set();
+
+      function renderGroups(kind, t) {
+        const categories = F.categoriesFor(kind);
+        const list = kind === "asset" ? state.assets : state.liabilities;
+        const catTotals = kind === "asset" ? t.assetCategories : t.liabilityCategories;
+        const html = categories.map((cat) => {
+          const items = list.filter((i) => F.findSubtype(kind, i.subtype)?.category.key === cat.key);
+          const active = kind === "liability" ? items.filter((i) => !i.paid) : items;
+          const paid = kind === "liability" ? items.filter((i) => i.paid) : [];
+          const total = catTotals.find((c) => c.key === cat.key).totalCents;
+          const rows = active.map((i) => itemRowHtml(kind, i)).join("");
+          const memberHtml = kind === "liability" && cat.key === "member" ? memberCardHtml(t) : "";
+          const empty = !rows && !memberHtml && !paid.length ? `<p class="empty">暂无项目</p>` : "";
+          const paidKey = `${cat.key}`;
+          const paidHtml = paid.length
+            ? `<button class="paid-toggle" type="button" data-paid-toggle="${paidKey}">${expandedPaid.has(paidKey) ? "收起" : "查看"}已支付（不计入）${paid.length} 项</button>
+               ${expandedPaid.has(paidKey) ? `<div class="item-list">${paid.map((i) => itemRowHtml(kind, i)).join("")}</div>` : ""}`
+            : "";
+          return `<div class="group" data-group="${cat.key}">
+            <div class="group-head">
+              <span><span class="group-title">${escapeHtml(cat.label)}</span><span class="group-total">${escapeHtml(money(total))}</span></span>
+              <button class="small" type="button" data-add="${kind}" data-category="${cat.key}">+ 添加</button>
+            </div>
+            <p class="group-hint">${escapeHtml(cat.hint)}</p>
+            <div class="item-list">${memberHtml}${rows}${empty}</div>
+            ${paidHtml}
+          </div>`;
+        }).join("");
+        $(kind === "asset" ? "#assetGroups" : "#liabilityGroups").innerHTML = html;
+      }
+
+      function shareRows(cats, cls) {
+        const nonzero = cats.filter((c) => c.totalCents > 0);
+        if (!nonzero.length) return `<p class="empty">暂无数据</p>`;
+        return nonzero.map((c) => `
+          <div class="share-row ${cls}">
+            <span>${escapeHtml(c.label)}</span>
+            <span class="num">${escapeHtml(money(c.totalCents))} · ${(c.share * 100).toFixed(1)}%</span>
+            <span class="bar"><i style="width:${(c.share * 100).toFixed(2)}%"></i></span>
+          </div>`).join("");
+      }
+
+      function renderResults(t) {
+        const last = F.latestSnapshot(state);
+        let changeHtml = `<p class="empty">还没有历史盘点，保存一次盘点后可以看到变化。</p>`;
+        if (last) {
+          const cmp = F.compareSnapshots(last, F.createSnapshot(state, { date: F.todayString() }));
+          changeHtml = `<div class="kv">
+            <span>上次盘点</span><span>${escapeHtml(last.date)}（${formatTime(last.takenAt)}）</span>
+            <span>资产变化</span><span>${moneyHtml(cmp.assetsDiffCents, { signed: true })}</span>
+            <span>负债变化</span><span>${moneyHtml(cmp.liabilitiesDiffCents, { signed: true })}</span>
+            <span>净资产变化</span><span>${moneyHtml(cmp.netDiffCents, { signed: true })}</span>
+          </div>${cmp.basisChanged ? `<p class="formula">注意：会员储值口径与上次不同，变化中包含口径调整的影响。</p>` : ""}`;
+        }
+        const hints = F.buildHints(state, t);
+        let scenarioHtml = "";
+        if (t.memberScenarios.length) {
+          scenarioHtml = `<div class="result-block">
+            <p class="result-label">会员储值核算：不同口径下的净资产</p>
+            <div class="table-wrap"><table>
+              <thead><tr><th>口径</th><th>会员负债</th><th>净资产</th></tr></thead>
+              <tbody>${t.memberScenarios.map((s) => `
+                <tr class="${s.current ? "current" : ""}"><td>${escapeHtml(s.label)}${s.current ? "（当前）" : ""}</td>
+                <td>${escapeHtml(money(s.liabilityCents))}</td><td>${moneyHtml(s.netCents)}</td></tr>`).join("")}
+              </tbody></table></div>
+            <p class="formula">只换口径、不改其他数据时净资产的差异。正式结果按标注「当前」的口径计算。</p>
+          </div>`;
+        }
+        $("#results").innerHTML = `
+          <div class="result-block">
+            <div class="kv">
+              <span>资产总额</span><span>${moneyHtml(t.assetsCents)}</span>
+              <span>负债总额</span><span>${moneyHtml(t.liabilitiesCents)}</span>
+              <span>净资产</span><span>${moneyHtml(t.netCents)}</span>
+            </div>
+          </div>
+          <div class="result-block"><p class="result-label">财务状况提示</p>
+            <ul class="hint-list" id="hintList">${hints.map((h) => `<li class="${h.level}">${escapeHtml(h.text)}</li>`).join("")}</ul>
+          </div>
+          <div class="result-block"><p class="result-label">资产构成</p>${shareRows(t.assetCategories, "")}</div>
+          <div class="result-block"><p class="result-label">负债构成</p>${shareRows(t.liabilityCategories, "liab")}</div>
+          ${scenarioHtml}
+          <div class="result-block"><p class="result-label">与上次盘点相比</p>${changeHtml}</div>`;
+      }
+
+      let compareSelection = { from: "", to: "current" };
+
+      function renderHistory() {
+        const snaps = state.snapshots.slice().reverse();
+        if (!snaps.length) {
+          $("#history").innerHTML = `<p class="empty">还没有盘点记录。录好数据后点「保存本次盘点」，系统会保留当时的明细和口径。</p>`;
+          return;
+        }
+        const rows = snaps.map((s) => `
+          <div class="snapshot-row" data-snapshot="${escapeHtml(s.id)}">
+            <div class="item-main">
+              <span class="item-name">${escapeHtml(s.date)} 盘点</span>
+              <span class="item-meta">净资产 ${escapeHtml(money(s.totals.netCents))} · 资产 ${escapeHtml(money(s.totals.assetsCents))} · 负债 ${escapeHtml(money(s.totals.liabilitiesCents))}</span>
+              ${s.note ? `<span class="item-note">${escapeHtml(s.note)}</span>` : ""}
+            </div>
+            <div class="snapshot-actions">
+              <button class="small" type="button" data-view="${escapeHtml(s.id)}">查看</button>
+              <button class="small danger" type="button" data-del-snapshot="${escapeHtml(s.id)}" aria-label="删除盘点">删除</button>
+            </div>
+          </div>`).join("");
+        const option = (s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.date)} 盘点 ${formatTime(s.takenAt).slice(11)}</option>`;
+        if (!compareSelection.from || !state.snapshots.some((s) => s.id === compareSelection.from)) {
+          compareSelection.from = state.snapshots[0].id;
+        }
+        $("#history").innerHTML = `
+          ${rows}
+          <div class="compare-bar">
+            <label><span class="label-row"><strong>从</strong></span><select id="compareFrom">${state.snapshots.map(option).join("")}</select></label>
+            <label><span class="label-row"><strong>到</strong></span><select id="compareTo"><option value="current">当前数据</option>${state.snapshots.map(option).join("")}</select></label>
+            <button class="ghost" id="compareRun" type="button">比较变化</button>
+          </div>
+          <div class="compare-result" id="compareResult"></div>`;
+        $("#compareFrom").value = compareSelection.from;
+        $("#compareTo").value = compareSelection.to;
+      }
+
+      function diffItemRows(rows) {
+        if (!rows.length) return `<tr><td colspan="3" style="color:var(--muted)">无变化</td></tr>`;
+        const label = { added: "（新增）", removed: "（删除）", changed: "" };
+        return rows.map((r) => `<tr><td>${escapeHtml(r.name)}${label[r.change]}</td><td>${escapeHtml(money(r.fromCents, { unknown: "—" }))}</td><td>${escapeHtml(money(r.toCents, { unknown: "—" }))}</td></tr>`).join("");
+      }
+
+      function runCompare() {
+        compareSelection = { from: $("#compareFrom").value, to: $("#compareTo").value };
+        const from = state.snapshots.find((s) => s.id === compareSelection.from);
+        const to = compareSelection.to === "current"
+          ? F.createSnapshot(state, { date: "当前数据" })
+          : state.snapshots.find((s) => s.id === compareSelection.to);
+        if (!from || !to) return;
+        const cmp = F.compareSnapshots(from, to);
+        const catRows = (cats) => cats.filter((c) => c.fromCents || c.toCents).map((c) => `<tr><td>${escapeHtml(c.label)}</td><td>${escapeHtml(money(c.fromCents))}</td><td>${escapeHtml(money(c.toCents))}</td><td>${moneyHtml(c.diffCents, { signed: true })}</td></tr>`).join("");
+        $("#compareResult").innerHTML = `
+          <div class="table-wrap"><table data-testid="compare-table">
+            <thead><tr><th>${escapeHtml(from.date)} → ${escapeHtml(to.date)}</th><th>之前</th><th>之后</th><th>变化</th></tr></thead>
+            <tbody>
+              <tr><td><strong>资产总额</strong></td><td>${escapeHtml(money(from.totals.assetsCents))}</td><td>${escapeHtml(money(to.totals.assetsCents))}</td><td>${moneyHtml(cmp.assetsDiffCents, { signed: true })}</td></tr>
+              ${catRows(cmp.assetCategories)}
+              <tr><td><strong>负债总额</strong></td><td>${escapeHtml(money(from.totals.liabilitiesCents))}</td><td>${escapeHtml(money(to.totals.liabilitiesCents))}</td><td>${moneyHtml(cmp.liabilitiesDiffCents, { signed: true })}</td></tr>
+              ${catRows(cmp.liabilityCategories)}
+              <tr><td><strong>净资产</strong></td><td>${escapeHtml(money(from.totals.netCents))}</td><td>${escapeHtml(money(to.totals.netCents))}</td><td id="compareNetDiff">${moneyHtml(cmp.netDiffCents, { signed: true })}</td></tr>
+            </tbody></table></div>
+          ${cmp.basisChanged ? `<p class="formula">会员储值口径不同：之前「${escapeHtml(cmp.fromBasis)}」，之后「${escapeHtml(cmp.toBasis)}」。</p>` : ""}
+          <p class="result-label" style="margin-top:12px">资产项目变化</p>
+          <div class="table-wrap"><table><thead><tr><th>项目</th><th>之前</th><th>之后</th></tr></thead><tbody>${diffItemRows(cmp.assetItems)}</tbody></table></div>
+          <p class="result-label" style="margin-top:12px">负债项目变化</p>
+          <div class="table-wrap"><table><thead><tr><th>项目</th><th>之前</th><th>之后</th></tr></thead><tbody>${diffItemRows(cmp.liabilityItems)}</tbody></table></div>`;
+      }
+
+      function render() {
+        const t = F.computeTotals(state);
+        if (document.activeElement !== $("#storeName")) $("#storeName").value = state.storeName || "";
+        renderOverview(t);
+        renderGroups("asset", t);
+        renderGroups("liability", t);
+        renderResults(t);
+        renderHistory();
+      }
+
+      /* ---------- 弹窗通用 ---------- */
+      function openModal(id) {
+        $(id).classList.add("open");
+      }
+      function closeModal(el) {
+        el.classList.remove("open");
+      }
+      document.querySelectorAll(".modal").forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal || event.target.closest("[data-close]")) closeModal(modal);
+        });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          const open = [...document.querySelectorAll(".modal.open")].pop();
+          if (open) closeModal(open);
+        }
+      });
+
+      let confirmAction = null;
+      function confirmDelete(title, text, action) {
+        $("#confirmTitle").textContent = title;
+        $("#confirmText").textContent = text;
+        confirmAction = action;
+        openModal("#confirmModal");
+      }
+      $("#confirmOk").addEventListener("click", () => {
+        closeModal($("#confirmModal"));
+        const action = confirmAction;
+        confirmAction = null;
+        if (action) action();
+      });
+      $("#confirmCancel").addEventListener("click", () => closeModal($("#confirmModal")));
+
+      function showMessages(box, messages) {
+        box.innerHTML = messages.length ? `<ul>${messages.map((m) => `<li>${escapeHtml(m)}</li>`).join("")}</ul>` : "";
+        box.classList.toggle("show", messages.length > 0);
+      }
+
+      /* ---------- 项目表单 ---------- */
+      let editing = null; // { kind, id, categoryKey }
+      let acknowledgedWarnings = "";
+
+      function setStatusRadio(status) {
+        document.querySelectorAll('input[name="itemStatus"]').forEach((r) => (r.checked = r.value === status));
+      }
+      function getStatusRadio() {
+        const r = document.querySelector('input[name="itemStatus"]:checked');
+        return r ? r.value : "";
+      }
+
+      function syncItemFormVisibility() {
+        const kind = editing.kind;
+        const found = F.findSubtype(kind, $("#itemSubtype").value);
+        const subtype = found ? found.subtype : {};
+        const catKey = found ? found.category.key : "";
+        $("#depositFaceWrap").style.display = subtype.deposit ? "" : "none";
+        $("#periodWrap").style.display = subtype.period ? "" : "none";
+        $("#prepaidHelper").style.display = kind === "asset" && catKey === "prepaid" ? "" : "none";
+        $("#liabilityFields").style.display = kind === "liability" ? "" : "none";
+        $("#itemAmountLabel").textContent = subtype.deposit
+          ? "预计可收回金额"
+          : catKey === "prepaid"
+            ? "尚未使用的金额"
+            : catKey === "inventory"
+              ? "库存估值"
+              : "金额";
+        $("#itemAmountHint").textContent = subtype.deposit ? "扣除可能的扣款后" : "人民币，精确到分";
+        const unknown = $("#itemUnknown").checked;
+        $("#itemAmount").disabled = unknown;
+        if (unknown) setStatusRadio("pending");
+        document.querySelectorAll('input[name="itemStatus"]').forEach((r) => {
+          r.disabled = unknown && r.value !== "pending";
+        });
+      }
+
+      function openItemForm(kind, categoryKey, id) {
+        const list = kind === "asset" ? state.assets : state.liabilities;
+        const item = id ? list.find((i) => i.id === id) : null;
+        const catKey = item ? F.findSubtype(kind, item.subtype).category.key : categoryKey;
+        const category = F.findCategory(kind, catKey);
+        editing = { kind, id: item ? item.id : null, categoryKey: catKey };
+        acknowledgedWarnings = "";
+        $("#itemTitle").textContent = `${item ? "编辑" : "新增"}${kind === "asset" ? "资产" : "负债"}`;
+        $("#itemCategoryLabel").textContent = category.label;
+        $("#itemSubtype").innerHTML = category.subtypes.map((s) => `<option value="${s.key}">${escapeHtml(s.label)}</option>`).join("");
+        const subtype = item ? item.subtype : category.subtypes[0].key;
+        $("#itemSubtype").value = subtype;
+        $("#itemName").value = item ? item.name : F.findSubtype(kind, subtype).subtype.label;
+        $("#itemAmount").value = item ? F.centsToInput(item.amountCents) : "";
+        $("#itemUnknown").checked = !!item && item.amountCents == null;
+        $("#itemFace").value = item ? F.centsToInput(item.faceCents) : "";
+        $("#itemPeriodStart").value = item ? item.periodStart || "" : "";
+        $("#itemPeriodEnd").value = item ? item.periodEnd || "" : "";
+        $("#itemSource").value = item ? item.source || "" : "";
+        $("#itemNote").value = item ? item.note || "" : "";
+        $("#itemIncurred").value = item ? item.incurredDate || "" : F.todayString();
+        $("#itemDue").value = item ? item.dueDate || "" : "";
+        $("#itemPaid").checked = !!(item && item.paid);
+        ["#helpTotal", "#helpMonths", "#helpUsed"].forEach((s) => ($(s).value = ""));
+        setStatusRadio(item ? item.status : F.findSubtype(kind, subtype).subtype.defaultStatus || "confirmed");
+        $("#itemDelete").style.display = item ? "" : "none";
+        $("#itemSave").textContent = "保存";
+        showMessages($("#itemErrors"), []);
+        showMessages($("#itemWarnings"), []);
+        $("#itemAmount").classList.remove("invalid");
+
+        const historyWrap = $("#itemHistoryWrap");
+        if (item) {
+          const changes = F.changesForItem(state, item.id);
+          const actionText = { create: "新增", update: "修改", delete: "删除", paid: "标记已支付", transfer_in: "到账转入", transfer_out: "到账转出" };
+          $("#itemHistory").innerHTML = changes.length
+            ? changes.map((c) => `<li>${formatTime(c.at)} ${actionText[c.action] || c.action}：${escapeHtml(money(c.fromCents, { unknown: "—" }))} → ${escapeHtml(money(c.toCents, { unknown: "—" }))}${c.memo ? `（${escapeHtml(c.memo)}）` : ""}</li>`).join("")
+            : "<li>暂无记录</li>";
+          historyWrap.style.display = "";
+        } else {
+          historyWrap.style.display = "none";
+        }
+        syncItemFormVisibility();
+        openModal("#itemModal");
+        setTimeout(() => $("#itemAmount").focus(), 50);
+      }
+
+      $("#itemSubtype").addEventListener("change", () => {
+        const kind = editing.kind;
+        const labels = F.categoriesFor(kind).flatMap((c) => c.subtypes.map((s) => s.label));
+        const found = F.findSubtype(kind, $("#itemSubtype").value);
+        if (!$("#itemName").value.trim() || labels.includes($("#itemName").value.trim())) {
+          $("#itemName").value = found.subtype.label;
+        }
+        if (!editing.id) setStatusRadio(found.subtype.defaultStatus || "confirmed");
+        syncItemFormVisibility();
+      });
+      $("#itemUnknown").addEventListener("change", syncItemFormVisibility);
+
+      $("#helpApply").addEventListener("click", () => {
+        const total = F.parseMoney($("#helpTotal").value);
+        if (!total.ok) return showMessages($("#itemErrors"), [`已付总额：${total.error}`]);
+        const result = F.unusedPrepaid(total.cents, Number($("#helpMonths").value), Number($("#helpUsed").value || 0));
+        if (result.error) return showMessages($("#itemErrors"), [result.error]);
+        $("#itemAmount").value = F.centsToInput(result.cents);
+        showMessages($("#itemErrors"), []);
+      });
+
+      function collectItem() {
+        const kind = editing.kind;
+        const errors = [];
+        const unknown = $("#itemUnknown").checked;
+        let amountCents = null;
+        if (!unknown) {
+          const parsed = F.parseMoney($("#itemAmount").value);
+          if (parsed.ok) amountCents = parsed.cents;
+          else errors.push(`金额：${parsed.error}`);
+        }
+        $("#itemAmount").classList.toggle("invalid", errors.length > 0);
+        const item = {
+          id: editing.id || undefined,
+          subtype: $("#itemSubtype").value,
+          name: $("#itemName").value.trim(),
+          amountCents,
+          status: getStatusRadio(),
+          source: $("#itemSource").value.trim(),
+          note: $("#itemNote").value.trim()
+        };
+        const found = F.findSubtype(kind, item.subtype);
+        if (found && found.subtype.deposit && $("#itemFace").value.trim()) {
+          const face = F.parseMoney($("#itemFace").value);
+          if (face.ok) item.faceCents = face.cents;
+          else errors.push(`押金原额：${face.error}`);
+        }
+        if (found && found.subtype.period) {
+          item.periodStart = $("#itemPeriodStart").value || "";
+          item.periodEnd = $("#itemPeriodEnd").value || "";
+        }
+        if (kind === "liability") {
+          item.incurredDate = $("#itemIncurred").value;
+          item.dueDate = $("#itemDue").value || "";
+          item.paid = $("#itemPaid").checked;
+        }
+        if (editing.id) {
+          const list = kind === "asset" ? state.assets : state.liabilities;
+          const before = list.find((i) => i.id === editing.id);
+          if (before) item.createdAt = before.createdAt;
+        }
+        return { item, errors };
+      }
+
+      $("#itemForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const { item, errors } = collectItem();
+        const result = F.validateItem(editing.kind, item, state);
+        const allErrors = errors.concat(result.errors);
+        showMessages($("#itemErrors"), allErrors);
+        if (allErrors.length) {
+          showMessages($("#itemWarnings"), []);
+          return;
+        }
+        const signature = result.warnings.join("|");
+        if (result.warnings.length && signature !== acknowledgedWarnings) {
+          acknowledgedWarnings = signature;
+          showMessages($("#itemWarnings"), result.warnings.concat(["确认不是重复记录后，再点一次保存。"]));
+          $("#itemSave").textContent = "确认不是重复，仍然保存";
+          return;
+        }
+        const wasNew = !editing.id;
+        const next = F.upsertItem(state, editing.kind, item).state;
+        if (commit(next, wasNew ? "已新增" : "已保存修改")) closeModal($("#itemModal"));
+      });
+
+      $("#itemDelete").addEventListener("click", () => {
+        const { kind, id } = editing;
+        const list = kind === "asset" ? state.assets : state.liabilities;
+        const item = list.find((i) => i.id === id);
+        if (!item) return;
+        confirmDelete("删除这个项目？", `「${item.name}」${item.amountCents == null ? "" : ` ${money(item.amountCents)}`} 将从当前数据中删除，相关合计会立即更新。已保存的历史盘点不受影响。`, () => {
+          if (commit(F.deleteItem(state, kind, id).state, "已删除")) closeModal($("#itemModal"));
+        });
+      });
+
+      /* ---------- 会员储值 ---------- */
+      function mdRadio(name, value) {
+        document.querySelectorAll(`input[name="${name}"]`).forEach((r) => (r.checked = r.value === value));
+      }
+      function mdRadioValue(name) {
+        const r = document.querySelector(`input[name="${name}"]:checked`);
+        return r ? r.value : "";
+      }
+      function parseOptional(input, label, errors) {
+        const raw = input.value.trim();
+        if (!raw) return null;
+        const p = F.parseMoney(raw);
+        if (!p.ok) {
+          errors.push(`${label}：${p.error}`);
+          return null;
+        }
+        return p.cents;
+      }
+      function collectMember() {
+        const errors = [];
+        const md = {
+          enabled: true,
+          systemTotalCents: parseOptional($("#mdTotal"), "总未核销余额", errors),
+          composition: mdRadioValue("mdComposition"),
+          paidCents: parseOptional($("#mdPaid"), "实际充值余额", errors),
+          bonusCents: parseOptional($("#mdBonus"), "赠送余额", errors),
+          basis: mdRadioValue("mdBasis") || "full",
+          estimateCents: parseOptional($("#mdEstimate"), "暂估金额", errors),
+          rule: $("#mdRule").value.trim(),
+          note: $("#mdNote").value.trim()
+        };
+        if (md.composition === "split") md.estimateCents = null;
+        return { md, errors };
+      }
+      function syncMemberForm() {
+        const composition = mdRadioValue("mdComposition");
+        $("#mdSplit").style.display = composition === "split" ? "" : "none";
+        $("#mdUnknown").style.display = composition === "unknown" ? "" : "none";
+        // 已拆分时自动带出赠送余额，方便核对
+        const { md, errors } = collectMember();
+        const v = F.validateMemberDeposit(md);
+        if (errors.length || v.errors.length) {
+          $("#mdPreview").textContent = "填写完整后会显示计入负债的金额。";
+          return;
+        }
+        const m = F.computeMember(md);
+        $("#mdPreview").textContent = `${m.counted ? `计入负债 ${money(m.liabilityCents)}` : `暂不计入负债，${money(m.pendingCents)} 列为待确认`}。${m.basisLabel}`;
+      }
+      function openMemberForm() {
+        const md = state.memberDeposit;
+        $("#mdTotal").value = F.centsToInput(md.systemTotalCents);
+        $("#mdPaid").value = F.centsToInput(md.paidCents);
+        $("#mdBonus").value = F.centsToInput(md.bonusCents);
+        $("#mdEstimate").value = F.centsToInput(md.estimateCents);
+        $("#mdRule").value = md.rule || "";
+        $("#mdNote").value = md.note || "";
+        mdRadio("mdComposition", md.enabled ? md.composition : "unknown");
+        mdRadio("mdBasis", md.basis || "full");
+        $("#mdClear").style.display = md.enabled ? "" : "none";
+        showMessages($("#mdErrors"), []);
+        syncMemberForm();
+        openModal("#memberModal");
+      }
+      $("#memberForm").addEventListener("input", syncMemberForm);
+      $("#memberForm").addEventListener("change", syncMemberForm);
+      $("#memberForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const { md, errors } = collectMember();
+        const all = errors.concat(F.validateMemberDeposit(md).errors);
+        showMessages($("#mdErrors"), all);
+        if (all.length) return;
+        if (commit(F.updateMemberDeposit(state, md), "会员储值已保存")) closeModal($("#memberModal"));
+      });
+      $("#mdClear").addEventListener("click", () => {
+        confirmDelete("清除会员储值？", "会员储值余额将不再计入当前数据。已保存的历史盘点不受影响。", () => {
+          if (commit(F.updateMemberDeposit(state, F.createEmptyMemberDeposit()), "已清除会员储值")) closeModal($("#memberModal"));
+        });
+      });
+
+      /* ---------- 到账 ---------- */
+      let transferSource = null;
+      function openTransfer(id) {
+        const item = state.assets.find((i) => i.id === id);
+        if (!item) return;
+        const targets = state.assets.filter((i) => F.findSubtype("asset", i.subtype)?.category.key === "cash" && F.isCounted("asset", i));
+        transferSource = id;
+        $("#transferText").textContent = `「${item.name}」当前待结算 ${money(item.amountCents)}。确认到账后，待结算会减少，转入账户会增加相同金额，资产总额不变，不会重复统计。`;
+        $("#transferAmount").value = F.centsToInput(item.amountCents);
+        $("#transferTarget").innerHTML = targets.length
+          ? targets.map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}（${escapeHtml(money(t.amountCents))}）</option>`).join("")
+          : `<option value="">请先在「货币资金」添加已确认的银行卡等账户</option>`;
+        showMessages($("#transferErrors"), []);
+        openModal("#transferModal");
+      }
+      $("#transferForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const parsed = F.parseMoney($("#transferAmount").value);
+        if (!parsed.ok) return showMessages($("#transferErrors"), [parsed.error]);
+        const result = F.transferSettlement(state, transferSource, $("#transferTarget").value, parsed.cents);
+        if (result.error) return showMessages($("#transferErrors"), [result.error]);
+        if (commit(result.state, "已记录到账")) closeModal($("#transferModal"));
+      });
+
+      /* ---------- 盘点快照 ---------- */
+      $("#openSnapshot").addEventListener("click", () => {
+        const t = F.computeTotals(state);
+        $("#snapshotDate").value = F.todayString();
+        $("#snapshotNote").value = "";
+        $("#snapshotPreview").textContent = `资产 ${money(t.assetsCents)} · 负债 ${money(t.liabilitiesCents)} · 净资产 ${money(t.netCents)}${t.pendingCount ? ` · 含 ${t.pendingCount} 个待确认项目（不计入）` : ""}`;
+        showMessages($("#snapshotErrors"), []);
+        openModal("#snapshotModal");
+      });
+      $("#snapshotForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const date = $("#snapshotDate").value;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return showMessages($("#snapshotErrors"), ["请选择盘点日期"]);
+        if (!state.assets.length && !state.liabilities.length && !state.memberDeposit.enabled) {
+          return showMessages($("#snapshotErrors"), ["还没有任何数据，先录入资产或负债再盘点"]);
+        }
+        const { state: next } = F.addSnapshot(state, { date, note: $("#snapshotNote").value.trim() });
+        if (commit(next, "盘点已保存")) closeModal($("#snapshotModal"));
+      });
+
+      function viewSnapshot(id) {
+        const s = state.snapshots.find((x) => x.id === id);
+        if (!s) return;
+        const itemLine = (kind) => (i) => {
+          const counted = F.isCounted(kind, i);
+          return `<tr><td>${escapeHtml(i.name)} ${statusBadge(i.status)}${i.paid ? statusBadge("paid", "已支付") : ""}</td><td>${counted ? "" : '<span style="color:var(--muted)">不计入 </span>'}${escapeHtml(money(i.amountCents))}</td></tr>`;
+        };
+        const md = s.memberDeposit;
+        $("#viewTitle").textContent = `${s.date} 盘点`;
+        $("#viewBody").innerHTML = `
+          <p class="modal-text">保存于 ${formatTime(s.takenAt)}${s.storeName ? ` · ${escapeHtml(s.storeName)}` : ""}${s.note ? `<br>备注：${escapeHtml(s.note)}` : ""}</p>
+          <div class="kv" style="margin-top:12px">
+            <span>资产总额</span><span>${moneyHtml(s.totals.assetsCents)}</span>
+            <span>负债总额</span><span>${moneyHtml(s.totals.liabilitiesCents)}</span>
+            <span>净资产</span><span>${moneyHtml(s.totals.netCents)}</span>
+            <span>待确认（资产 / 负债）</span><span>${escapeHtml(money(s.totals.pendingAssetsCents))} / ${escapeHtml(money(s.totals.pendingLiabilitiesCents))}</span>
+            <span>估算项目</span><span>${s.estimatedItems.length} 项</span>
+          </div>
+          <p class="basis-line" style="background:var(--soft)">核算口径：${s.basis.rules.map(escapeHtml).join("；")}。会员储值：${escapeHtml(s.basis.member)}</p>
+          <p class="result-label" style="margin-top:12px">资产明细</p>
+          <div class="table-wrap"><table><tbody>${s.assets.map(itemLine("asset")).join("") || '<tr><td colspan="2">无</td></tr>'}</tbody></table></div>
+          <p class="result-label" style="margin-top:12px">负债明细</p>
+          <div class="table-wrap"><table><tbody>${s.liabilities.map(itemLine("liability")).join("")}${md.enabled ? `<tr><td>会员储值余额（系统 ${escapeHtml(money(md.systemTotalCents))}）</td><td>${escapeHtml(money(s.basis.memberLiabilityCents))}</td></tr>` : ""}${!s.liabilities.length && !md.enabled ? '<tr><td colspan="2">无</td></tr>' : ""}</tbody></table></div>`;
+        openModal("#viewModal");
+      }
+
+      /* ---------- 事件委托 ---------- */
+      document.querySelector("main").addEventListener("click", (event) => {
+        const t = event.target;
+        const transfer = t.closest("[data-transfer]");
+        if (transfer) return openTransfer(transfer.dataset.transfer);
+        const add = t.closest("[data-add]");
+        if (add) return openItemForm(add.dataset.add, add.dataset.category, null);
+        const edit = t.closest("[data-edit]");
+        if (edit) return openItemForm(edit.dataset.edit, null, edit.dataset.id);
+        if (t.closest("[data-member]")) return openMemberForm();
+        const paidToggle = t.closest("[data-paid-toggle]");
+        if (paidToggle) {
+          const key = paidToggle.dataset.paidToggle;
+          expandedPaid.has(key) ? expandedPaid.delete(key) : expandedPaid.add(key);
+          return render();
+        }
+        const view = t.closest("[data-view]");
+        if (view) return viewSnapshot(view.dataset.view);
+        const del = t.closest("[data-del-snapshot]");
+        if (del) {
+          const snap = state.snapshots.find((s) => s.id === del.dataset.delSnapshot);
+          return confirmDelete("删除这份盘点记录？", `${snap.date} 的盘点（净资产 ${money(snap.totals.netCents)}）删除后无法恢复。`, () => {
+            commit(F.deleteSnapshot(state, snap.id), "盘点记录已删除");
+          });
+        }
+        if (t.closest("#compareRun")) return runCompare();
+      });
+      document.querySelector("main").addEventListener("keydown", (event) => {
+        if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-edit], [data-member]")) {
+          event.preventDefault();
+          event.target.click();
+        }
+      });
+
+      $("#storeName").addEventListener("change", () => {
+        const next = JSON.parse(JSON.stringify(state));
+        next.storeName = $("#storeName").value.trim();
+        commit(next, "门店名称已保存");
+      });
+
+      /* ---------- 启动 ---------- */
+      try {
+        const loaded = F.loadState(localStorage);
+        state = loaded.state;
+        if (loaded.error) toast(loaded.error, true);
+      } catch (error) {
+        storageOk = false;
+        toast("当前浏览器无法使用本地存储，数据将无法保存", true);
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

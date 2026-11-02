@@ -72,6 +72,41 @@
       font-weight: 650;
     }
 
+    .tool-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .tool-link strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .tool-link span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .tool-link b {
+      flex: 0 0 auto;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
     .section {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -569,6 +604,14 @@
       </div>
     </header>
 
+    <a class="tool-link" href="finance.html">
+      <div>
+        <strong>门店财务状况</strong>
+        <span>盘点资产、负债，看扣除负债后的净资产</span>
+      </div>
+      <b>进入 →</b>
+    </a>
+
     <section class="section" aria-labelledby="input-title">
       <h2 class="section-title" id="input-title">经营数据</h2>
       <div class="form-grid">
@@ -762,7 +805,7 @@
 
     <footer>
       结果用于经营估算；平台抽成、税费、折旧、损耗等可并入其他杂费。
-      <span class="version-line">ririying 2.4 · by shibo</span>
+      <span class="version-line">ririying 2.5 · by shibo</span>
     </footer>
   </main>
 
@@ -1181,7 +1224,7 @@
         body: JSON.stringify({
           site: location.hostname,
           path: location.pathname,
-          version: "ririying 2.4"
+          version: "ririying 2.5"
         })
       }).catch(() => {});
     }
